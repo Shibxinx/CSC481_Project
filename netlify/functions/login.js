@@ -1,5 +1,7 @@
-import { supabase } from './utils/supabase.js';
+import { createClient } from '@supabase/supabase-js';
+
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+
 export default async (req, context) => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });

@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
+
 export default async (req) => {
   const url = new URL(req.url);
   const pathParts = url.pathname.split('/').filter(Boolean); // ['api', 'utilities', 'A101']
