@@ -48,7 +48,7 @@ export default async (req) => {
       const { data: repairs, error: repairError } = await query;
       if (repairError) throw repairError;
 
-      // ดึงข้อมูลห้องและสถานะมาประกอบแบบปลอดภัย ป้องกัน Error 500 กรณี Foreign Key ไม่สมบูรณ์
+      // ดึงข้อมูลห้องและสถานะมาประกอบแบบแยกตาราง ป้องกัน Error 500
       const { data: rooms } = await supabase.from('room').select('RoomID, RoomNumber');
       const { data: statuses } = await supabase.from('repairstatus').select('RepairStatusID, StatusName');
 
