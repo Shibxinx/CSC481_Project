@@ -737,34 +737,47 @@
             const btnOpenRepair = document.getElementById('btn-open-repair');
 
             if (currentUser) {
-                statusEl.classList.remove('hidden');
-                statusEl.classList.add('flex');
-
-                if (currentUser.roleId === 1) {
-                    nameEl.innerText = 'ผู้ดูแลระบบ (Admin)';
-                } else {
-                    const roomText = currentUser.roomNumber ? ` • ห้อง ${currentUser.roomNumber}` : '';
-                    nameEl.innerText = `${currentUser.name} (${currentUser.roleName})${roomText}`;
+                if (statusEl) {
+                    statusEl.classList.remove('hidden');
+                    statusEl.classList.add('flex');
                 }
 
-                btnEl.innerHTML = `<i class="fa-solid fa-right-from-bracket mr-1.5"></i>ออกจากระบบ`;
-                btnEl.className = "whitespace-nowrap bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors shadow-sm shrink-0";
-                btnEl.onclick = handleLogout;
-                btnOpenRepair.classList.remove('hidden');
+                if (nameEl) {
+                    if (currentUser.roleId === 1) {
+                        nameEl.innerText = 'ผู้ดูแลระบบ (Admin)';
+                    } else {
+                        const roomText = currentUser.roomNumber ? ` • ห้อง ${currentUser.roomNumber}` : '';
+                        nameEl.innerText = `${currentUser.name} (${currentUser.roleName})${roomText}`;
+                    }
+                }
 
-                if (currentUser.roleId === 1) {
-                    navAdmin.classList.remove('hidden');
-                } else {
-                    navAdmin.classList.add('hidden');
+                if (btnEl) {
+                    btnEl.innerHTML = `<i class="fa-solid fa-right-from-bracket mr-1.5"></i>ออกจากระบบ`;
+                    btnEl.className = "whitespace-nowrap bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors shadow-sm shrink-0";
+                    btnEl.onclick = handleLogout;
+                }
+
+                btnOpenRepair?.classList.remove('hidden');
+
+                if (navAdmin) {
+                    if (currentUser.roleId === 1) {
+                        navAdmin.classList.remove('hidden');
+                    } else {
+                        navAdmin.classList.add('hidden');
+                    }
                 }
             } else {
-                statusEl.classList.add('hidden');
-                statusEl.classList.remove('flex');
-                btnEl.innerHTML = `<i class="fa-solid fa-right-to-bracket mr-1.5"></i>เข้าสู่ระบบ`;
-                btnEl.className = "whitespace-nowrap bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors shadow-sm shrink-0";
-                btnEl.onclick = openLoginModal;
-                navAdmin.classList.add('hidden');
-                btnOpenRepair.classList.add('hidden');
+                if (statusEl) {
+                    statusEl.classList.add('hidden');
+                    statusEl.classList.remove('flex');
+                }
+                if (btnEl) {
+                    btnEl.innerHTML = `<i class="fa-solid fa-right-to-bracket mr-1.5"></i>เข้าสู่ระบบ`;
+                    btnEl.className = "whitespace-nowrap bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors shadow-sm shrink-0";
+                    btnEl.onclick = openLoginModal;
+                }
+                navAdmin?.classList.add('hidden');
+                btnOpenRepair?.classList.add('hidden');
             }
         }
 
