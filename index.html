@@ -750,6 +750,9 @@
                     console.error('API Error:', data);
                     return;
                 }
+                data.sort((a, b) => {
+                    return String(a.roomNumber).localeCompare(String(b.roomNumber), 'th', { numeric: true });
+                });
                 rooms = data;
                 renderRooms(rooms);
                 if (currentUser && currentUser.roleId === 1) {
