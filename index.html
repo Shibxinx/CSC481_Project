@@ -1094,6 +1094,8 @@
 
         function openLoginModal() {
             document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
             openModal('login-modal');
         }
 
