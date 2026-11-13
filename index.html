@@ -1354,17 +1354,25 @@
             }
         }
 
-        function openRepairModal() {
+        async function openRepairModal() {
             const select = document.getElementById('repair-room-id');
-            if (select) {
-                // เติมรายชื่อห้องทั้งหมดจากตัวแปร rooms
-                select.innerHTML = '<option value="">-- เลือกห้องพัก --</option>' +
-                    rooms.map(r => `<option value="${r.id}">ห้อง ${r.roomNumber}</option>`).join('');
 
-                // ถ้าผู้ใช้เป็นผู้เช่าทั่วไป (ไม่ใช่แอดมิน) อาจจะล็อกห้องของตัวเองไว้เลย (ถ้ามีข้อมูล roomId)
+            if (select) {
+                if (!rooms || rooms.length === 0) {
+                    try {
+                        const res = await fetch(`${API_URL}/rooms`);
+                        rooms = await res.json();
+                    } catch (err) {
+                        console.error("ไม่สามารถโหลดรายชื่อห้องได้", err);
+                    }
+                }
+
+                select.innerHTML = '<option value="">-- เลือกห้องพัก --</option>' +
+                    (rooms || []).map(r => `<option value="${r.id}">ห้อง ${r.roomNumber}</option>`).join('');
+
                 if (currentUser && currentUser.roleId !== 1 && currentUser.roomId) {
                     select.value = currentUser.roomId;
-                    select.disabled = true; // ล็อกไม่ให้เปลี่ยนห้องอื่น
+                    select.disabled = true;
                 }
             }
             openModal('repair-modal');
