@@ -876,24 +876,41 @@
             }
             currentViewingRoomNumber = roomNo;
             document.getElementById('utility-room-number').innerText = roomNo;
+
             try {
+                // 1. ดึงข้อมูลบิลค่าน้ำ-ค่าไฟ
                 const res = await fetch(`${API_URL}/utilities/${roomNo}`);
                 if (!res.ok) throw new Error('ไม่พบข้อมูลบิล');
                 const bill = await res.json();
-                currentBillTotalAmount = Number(bill.WaterAmount) + Number(bill.ElectricAmount);
+
+                // 2. ค้นหาข้อมูลห้องจากตัวแปร global 'rooms' เพื่อดึงราคาเช่าและขนาดพื้นที่ (AreaSqm)
+                const roomData = rooms.find(r => r.roomNumber === roomNo);
+                const roomRent = roomData ? Number(roomData.price || 0) : 0;
+                const areaSqm = roomData ? Number(roomData.areaSqm || 0) : 0;
+
+                // คำนวณค่าส่วนกลาง: ขนาดพื้นที่ (ตร.ม.) * 30 บาท
+                const commonFee = areaSqm * 30;
+
+                const waterAmount = Number(bill.WaterAmount || 0);
+                const electricAmount = Number(bill.ElectricAmount || 0);
+
+                // 3. รวมยอดชำระสุทธิทั้งหมด
+                currentBillTotalAmount = roomRent + commonFee + waterAmount + electricAmount;
 
                 document.getElementById('utility-details').innerHTML = `
-                    <div class="bg-slate-50 p-4 rounded-xl space-y-2">
-                        <div class="flex justify-between"><span>รอบบิลเดือน:</span> <b>${bill.BillingMonth}</b></div>
-                        <div class="flex justify-between"><span>ค่าน้ำประปา (${bill.WaterUnits} หน่วย):</span> <b>฿${bill.WaterAmount}</b></div>
-                        <div class="flex justify-between"><span>ค่าไฟฟ้า (${bill.ElectricUnits} หน่วย):</span> <b>฿${bill.ElectricAmount}</b></div>
-                        <div class="flex justify-between border-t pt-2 text-brand-600 font-bold text-base"><span>รวมค่าน้ำ-ไฟ:</span> <span>฿${currentBillTotalAmount}</span></div>
-                    </div>
-                `;
+            <div class="bg-slate-50 p-4 rounded-xl space-y-2">
+                <div class="flex justify-between"><span>รอบบิลเดือน:</span> <b>${bill.BillingMonth}</b></div>
+                <div class="flex justify-between"><span>ค่าเช่าห้องพัก:</span> <b>฿${roomRent.toLocaleString()}</b></div>
+                <div class="flex justify-between"><span>ค่าส่วนกลาง (${areaSqm} ตร.ม. × 30 บ.):</span> <b>฿${commonFee.toLocaleString()}</b></div>
+                <div class="flex justify-between"><span>ค่าน้ำประปา (${bill.WaterUnits} หน่วย):</span> <b>฿${waterAmount.toLocaleString()}</b></div>
+                <div class="flex justify-between"><span>ค่าไฟฟ้า (${bill.ElectricUnits} หน่วย):</span> <b>฿${electricAmount.toLocaleString()}</b></div>
+                <div class="flex justify-between border-t pt-2 text-brand-600 font-bold text-base"><span>รวมยอดชำระสุทธิ:</span> <span>฿${currentBillTotalAmount.toLocaleString()}</span></div>
+            </div>
+        `;
                 document.getElementById('payment-btn-container')?.classList.remove('hidden');
             } catch (err) {
                 currentBillTotalAmount = 0;
-                document.getElementById('utility-details').innerHTML = `<p class="text-rose-500 text-center">ยังไม่มีข้อมูลบิลค่าน้ำค่าไฟของห้อง ${roomNo} ในรอบนี้</p>`;
+                document.getElementById('utility-details').innerHTML = `<p class="text-rose-500 text-center">ยังไม่มีข้อมูลบิลของห้อง ${roomNo} ในรอบนี้</p>`;
                 document.getElementById('payment-btn-container')?.classList.add('hidden');
             }
         }
