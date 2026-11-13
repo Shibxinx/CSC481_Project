@@ -11,7 +11,8 @@ export default async (req) => {
     // PUT /api/repairs/:id/status (อัปเดตสถานะการซ่อม)
     if (method === 'PUT' && pathParts.length === 4 && pathParts[3] === 'status') {
       const requestId = pathParts[2];
-      const { repairStatusId } = await req.json();
+      const body = await req.json();
+      const { repairStatusId } = body;
 
       if (!repairStatusId) {
         return new Response(JSON.stringify({ error: 'กรุณาระบุสถานะซ่อม' }), { status: 400 });
@@ -19,7 +20,7 @@ export default async (req) => {
 
       const { error } = await supabase
         .from('repairrequest')
-        .update({ RepairStatusID: repairStatusId })
+        .update({ RepairStatusID: Number(repairStatusId) })
         .eq('RequestID', requestId);
 
       if (error) throw error;
@@ -37,31 +38,34 @@ export default async (req) => {
 
       let query = supabase
         .from('repairrequest')
-        .select(`
-          RequestID, RoomID, Title, Description, ReportDate, Priority, RepairCost,
-          room:RoomID(RoomNumber),
-          repairstatus:RepairStatusID(StatusName)
-        `)
+        .select('*')
         .order('ReportDate', { ascending: false });
 
       if (roleId !== '1' && roomId) {
         query = query.eq('RoomID', roomId);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
+      const { data: repairs, error: repairError } = await query;
+      if (repairError) throw repairError;
 
-      const formatted = data.map(rr => ({
+      // ดึงข้อมูลห้องและสถานะมาประกอบแบบปลอดภัย ป้องกัน Error 500 กรณี Foreign Key ไม่สมบูรณ์
+      const { data: rooms } = await supabase.from('room').select('RoomID, RoomNumber');
+      const { data: statuses } = await supabase.from('repairstatus').select('RepairStatusID, StatusName');
+
+      const roomMap = new Map((rooms || []).map(r => [r.RoomID, r.RoomNumber]));
+      const statusMap = new Map((statuses || []).map(s => [s.RepairStatusID, s.StatusName]));
+
+      const formatted = (repairs || []).map(rr => ({
         id: rr.RequestID,
         roomId: rr.RoomID,
-        roomNumber: rr.room?.RoomNumber || '',
+        roomNumber: roomMap.get(rr.RoomID) || '-',
         title: rr.Title,
         description: rr.Description,
         reportDate: rr.ReportDate,
         priority: rr.Priority,
         repairStatusID: rr.RepairStatusID,
-        statusName: rr.repairstatus?.StatusName || 'รอการดำเนินการ',
-        repairCost: rr.RepairCost
+        statusName: statusMap.get(rr.RepairStatusID) || 'รอดำเนินการ',
+        repairCost: rr.RepairCost || 0
       }));
 
       return new Response(JSON.stringify(formatted), {
@@ -72,14 +76,21 @@ export default async (req) => {
 
     // POST /api/repairs (สร้างใบแจ้งซ่อมใหม่)
     if (method === 'POST') {
-      const { roomId, tenantId, title, description, priority } = await req.json();
+      let body;
+      try {
+        body = await req.json();
+      } catch (e) {
+        return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
+      }
+
+      const { roomId, tenantId, title, description, priority } = body;
       if (!roomId || !title) {
         return new Response(JSON.stringify({ error: 'กรุณาระบุข้อมูลให้ครบถ้วน' }), { status: 400 });
       }
 
       const { error } = await supabase.from('repairrequest').insert([{
-        RoomID: roomId,
-        TenantID: tenantId || 1,
+        RoomID: Number(roomId),
+        TenantID: Number(tenantId || 1),
         Title: title,
         Description: description || '',
         ReportDate: new Date().toISOString().split('T')[0],
@@ -98,10 +109,10 @@ export default async (req) => {
 
     return new Response(JSON.stringify({ error: 'Not Found' }), { status: 404 });
   } catch (err) {
+    console.error("API Error:", err);
     return new Response(JSON.stringify({ error: err.message }), {
       headers: { "Content-Type": "application/json" },
       status: 500
     });
   }
 };
-
