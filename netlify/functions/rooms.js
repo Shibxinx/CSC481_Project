@@ -3,48 +3,45 @@ import { createClient } from '@supabase/supabase-js';
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 export default async (req, context) => {
-  try {
-    const url = new URL(req.url);
-    const pathParts = url.pathname.split('/');
-    const roomId = pathParts[pathParts.length - 1];
+  if (req.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      headers: { "Content-Type": "application/json" },
+      status: 405
+    });
+  }
 
-    // ค้นหาโดยใช้ชื่อคอลัมน์ "RoomID" ตามตารางจริงใน Supabase
+  try {
     const { data, error } = await supabase
       .from('room')
-      .select('*')
-      .eq('RoomID', roomId)
-      .single();
+      .select('*');
 
-    if (error) throw error;
-    if (!data) {
-      return new Response(JSON.stringify({ error: 'ไม่พบข้อมูลห้อง' }), { 
-        status: 404, 
-        headers: { "Content-Type": "application/json" } 
-      });
+    if (error) {
+      throw error;
     }
 
-    // Mapping ชื่อฟิลด์ให้ตรงกับที่ Frontend รอรับ
-    const formattedRoom = {
-      id: data.RoomID,           // แปลง RoomID เป็น id สำหรับใช้งานฝั่งหน้าเว็บ
-      buildingID: data.BuildingID,
-      roomNumber: data.RoomNumber, // ตรงกับคอลัมน์ RoomNumber[cite: 16]
-      floor: data.Floor,           // ตรงกับคอลัมน์ Floor[cite: 16]
-      roomTypeID: data.RoomTypeID,
-      roomStatusID: data.RoomStatusID,
-      areaSqm: data.AreaSqm,       // ตรงกับคอลัมน์ AreaSqm[cite: 16]
-      description: data.Description, // ตรงกับคอลัมน์ Description[cite: 16]
-      price: data.BaseRent,      // ดึง BaseRent มาแสดงเป็นราคาค่าเช่า[cite: 16]
-      image: data.ImageUrl         // ดึง ImageUrl มาแสดงรูปภาพ[cite: 16]
-    };
+    // แปลงชื่อฟิลด์จาก Database ให้ตรงกับที่ Frontend คาดหวัง
+    const formattedRooms = (data || []).map(room => ({
+      id: room.RoomID,
+      buildingID: room.BuildingID,
+      roomNumber: room.RoomNumber,
+      floor: room.Floor,
+      roomTypeID: room.RoomTypeID,
+      roomStatusID: room.RoomStatusID,
+      areaSqm: Number(room.AreaSqm || 0),       // แปลงขนาดพื้นที่ (สำคัญมากสำหรับค่าส่วนกลาง)
+      description: room.Description,
+      price: Number(room.BaseRent || 0),        // ค่าเช่าห้อง
+      image: room.ImageUrl                      // รูปภาพ
+    }));
 
-    return new Response(JSON.stringify(formattedRoom), {
+    return new Response(JSON.stringify(formattedRooms), {
       headers: { "Content-Type": "application/json" },
       status: 200
     });
+
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
+      status: 500
     });
   }
 };
