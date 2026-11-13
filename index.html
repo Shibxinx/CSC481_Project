@@ -1200,23 +1200,44 @@
 
         async function handleCreateRepair(e) {
             e.preventDefault();
-            if (!currentUser.roomId) return showToast('บัญชีนี้ยังไม่ได้ผูกกับห้องพัก', 'error');
+            const roomSelect = document.getElementById('repair-room-id');
+            const roomId = roomSelect ? roomSelect.value : currentUser?.roomId;
+
+            if (!roomId) {
+                return showToast('กรุณาระบุห้องพักหรือตรวจสอบการผูกห้อง', 'error');
+            }
+
+            const titleEl = document.getElementById('repair-title');
+            const descEl = document.getElementById('repair-description'); // แก้จาก repair-desc เป็น repair-description
+            const priorityEl = document.getElementById('repair-priority');
+
+            if (!titleEl || !descEl) {
+                return showToast('ไม่พบฟิลด์ข้อมูลในฟอร์ม', 'error');
+            }
+
             try {
                 const res = await fetch(`${API_URL}/repairs`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        roomId: currentUser.roomId,
-                        title: document.getElementById('repair-title').value,
-                        description: document.getElementById('repair-desc').value,
-                        priority: document.getElementById('repair-priority').value
+                        roomId: Number(roomId),
+                        title: titleEl.value,
+                        description: descEl.value,
+                        priority: priorityEl ? priorityEl.value : 'Normal'
                     })
                 });
+
                 if (!res.ok) throw new Error('แจ้งซ่อมไม่สำเร็จ');
-                closeModal('add-repair-modal');
+
+                closeModal('repair-modal'); 
+                titleEl.value = '';
+                descEl.value = '';
+
                 fetchRepairs();
                 showToast('ส่งเรื่องแจ้งซ่อมเรียบร้อย');
-            } catch (err) { showToast(err.message, 'error'); }
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
         }
 
         async function handleCreateNews(e) {
