@@ -32,10 +32,21 @@ export default async (req) => {
 
     // POST /api/announcements (สร้างประกาศใหม่)
     if (method === 'POST') {
-      const { userId, title, content, announcementType, publishDate } = await req.json();
+      let body;
+      try {
+        body = await req.json();
+      } catch (e) {
+        return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
+      }
+
+      const { userId, title, content, announcementType, publishDate } = body;
+
+      if (!title || !content) {
+        return new Response(JSON.stringify({ error: 'กรุณาระบุหัวข้อและเนื้อหาประกาศให้ครบถ้วน' }), { status: 400 });
+      }
 
       const { error } = await supabase.from('announcement').insert([{
-        CreatedByUserID: userId || 101,
+        CreatedByUserID: Number(userId || 1), // ตรวจสอบให้แน่ใจว่าเป็น ID ที่มีอยู่จริงในตารางผู้ใช้
         Title: title,
         Content: content,
         AnnouncementType: announcementType || 'General',
@@ -43,7 +54,10 @@ export default async (req) => {
         IsActive: true
       }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Announcement Insert Error:", error);
+        throw error;
+      }
 
       return new Response(JSON.stringify({ message: 'สร้างประกาศสำเร็จ' }), {
         headers: { "Content-Type": "application/json" },
