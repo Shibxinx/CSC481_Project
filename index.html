@@ -706,8 +706,10 @@
                             const adminInput = document.getElementById('admin-target-room');
                             if (adminInput) adminInput.value = '';
                             currentViewingRoomNumber = null;
-                            document.getElementById('utility-room-number').innerText = '-';
-                            document.getElementById('utility-details').innerHTML = `<p class="text-slate-500 text-center">กรุณากรอกหมายเลขห้องที่ต้องการตรวจสอบด้านบน</p>`;
+                            const roomNumEl = document.getElementById('utility-room-number');
+                            if (roomNumEl) roomNumEl.innerText = '-';
+                            const detailsEl = document.getElementById('utility-details');
+                            if (detailsEl) detailsEl.innerHTML = `<p class="text-slate-500 text-center">กรุณากรอกหมายเลขห้องที่ต้องการตรวจสอบด้านบน</p>`;
                             document.getElementById('payment-btn-container')?.classList.add('hidden');
                         } else {
                             adminSearchEl?.classList.add('hidden');
@@ -724,8 +726,17 @@
                 return;
             }
 
+            // ซ่อนทุกแท็บก่อน
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // แสดงเฉพาะแท็บที่เลือกแบบปลอดภัย (ป้องกัน Error กรณีหา ID ไม่เจอ)
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            } else {
+                console.error(`ไม่พบ Element ที่มี ID: tab-${tabId}`);
+            }
+
             if (tabId === 'admin') renderAdminRoomsTable();
         }
 
