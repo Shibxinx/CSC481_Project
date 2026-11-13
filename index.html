@@ -729,32 +729,35 @@
 
         async function openRoomDetail(roomId) {
             try {
-                const res = await fetch(`${API_URL}/rooms/${roomId}`);
-                if (!res.ok) throw new Error('ไม่พบข้อมูลห้อง');
-                const r = await res.json();
+                // ค้นหาข้อมูลห้องจากตัวแปร rooms ที่โหลดเก็บไว้แล้วในเครื่อง (ไม่ต้องยิง API แยก)
+                const r = rooms.find(item => item.id === roomId);
+                if (!r) throw new Error('ไม่พบข้อมูลห้อง');
+
                 const isAdmin = currentUser && currentUser.roleId === 1;
                 const status = r.statusName || 'ว่าง';
 
                 document.getElementById('modal-room-content').innerHTML = `
-                    <img src="${r.image || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80'}" class="h-64 w-full object-cover rounded-xl shadow-sm">
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-2xl font-bold text-slate-800">ห้อง ${r.roomNumber}</h3>
-                            <span class="text-sm px-3 py-1 rounded-full bg-brand-50 text-brand-600 font-semibold">${r.buildingName || 'อาคารหลัก'} (ชั้น ${r.floor})</span>
-                        </div>
-                        <p class="text-sm text-slate-600">${r.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
-                        <div class="grid grid-cols-2 gap-3 pt-2 text-sm bg-slate-50 p-3 rounded-xl">
-                            <div><span class="text-slate-400">ขนาดพื้นที่:</span> ${r.areaSqm || '-'} ตร.ม.</div>
-                            <div><span class="text-slate-400">สถานะ:</span> <b class="text-brand-600">${status}</b></div>
-                        </div>
-                        <div class="pt-2 flex justify-between items-center border-t">
-                            <span class="text-xl font-extrabold text-brand-600">฿${r.price.toLocaleString()} / เดือน</span>
-                            ${isAdmin ? `<button onclick="openEditRoomModal(${r.id})" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-xl font-medium shadow"><i class="fa-solid fa-pen-to-square mr-1"></i>แก้ไขข้อมูลห้อง</button>` : ''}
-                        </div>
-                    </div>
-                `;
+            <img src="${r.image || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80'}" class="h-64 w-full object-cover rounded-xl shadow-sm">
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold text-slate-800">ห้อง ${r.roomNumber}</h3>
+                    <span class="text-sm px-3 py-1 rounded-full bg-brand-50 text-brand-600 font-semibold">${r.buildingName || 'อาคารหลัก'} (ชั้น ${r.floor})</span>
+                </div>
+                <p class="text-sm text-slate-600">${r.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+                <div class="grid grid-cols-2 gap-3 pt-2 text-sm bg-slate-50 p-3 rounded-xl">
+                    <div><span class="text-slate-400">ขนาดพื้นที่:</span> ${r.areaSqm || '-'} ตร.ม.</div>
+                    <div><span class="text-slate-400">สถานะ:</span> <b class="text-brand-600">${status}</b></div>
+                </div>
+                <div class="pt-2 flex justify-between items-center border-t">
+                    <span class="text-xl font-extrabold text-brand-600">฿${Number(r.price || 0).toLocaleString()} / เดือน</span>
+                    ${isAdmin ? `<button onclick="openEditRoomModal(${r.id})" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-xl font-medium shadow"><i class="fa-solid fa-pen-to-square mr-1"></i>แก้ไขข้อมูลห้อง</button>` : ''}
+                </div>
+            </div>
+        `;
                 openModal('room-detail-modal');
-            } catch (err) { showToast('ไม่สามารถโหลดข้อมูลห้องได้', 'error'); }
+            } catch (err) {
+                showToast('ไม่สามารถโหลดข้อมูลได้', 'error');
+            }
         }
 
         // เปิด Modal แก้ไขข้อมูลห้องสำหรับ Admin
