@@ -59,7 +59,8 @@ export default async (req) => {
         description: rr.Description,
         reportDate: rr.ReportDate,
         priority: rr.Priority,
-        statusName: rr.repairstatus?.StatusName || '',
+        repairStatusID: rr.RepairStatusID,
+        statusName: rr.repairstatus?.StatusName || 'รอการดำเนินการ',
         repairCost: rr.RepairCost
       }));
 
