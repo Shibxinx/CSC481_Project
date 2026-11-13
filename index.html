@@ -1366,13 +1366,16 @@
                         console.error("ไม่สามารถโหลดรายชื่อห้องได้", err);
                     }
                 }
-
                 select.innerHTML = '<option value="">-- เลือกห้องพัก --</option>' +
                     (rooms || []).map(r => `<option value="${r.id}">ห้อง ${r.roomNumber}</option>`).join('');
+                select.disabled = false;
+                if (currentUser && Number(currentUser.roleId) !== 1) {
+                    const targetRoom = rooms.find(r => r.id == currentUser.roomId || r.roomNumber == currentUser.roomNumber);
 
-                if (currentUser && currentUser.roleId !== 1 && currentUser.roomId) {
-                    select.value = currentUser.roomId;
-                    select.disabled = true;
+                    if (targetRoom) {
+                        select.value = targetRoom.id;
+                        select.disabled = true; // ล็อกไม่ให้เปลี่ยนห้องอื่น
+                    }
                 }
             }
             openModal('repair-modal');
