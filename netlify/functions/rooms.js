@@ -45,3 +45,24 @@ export default async (req, context) => {
     });
   }
 };
+
+const formattedRooms = (data || []).map(room => {
+  // กำหนดชื่อสถานะตาม RoomStatusID
+  let statusName = 'ว่าง';
+  if (room.RoomStatusID === 2) statusName = 'จองแล้ว';
+  if (room.RoomStatusID === 3) statusName = 'เช่าอยู่';
+
+  return {
+    id: room.RoomID,
+    buildingID: room.BuildingID,
+    roomNumber: room.RoomNumber,
+    floor: room.Floor,
+    roomTypeID: room.RoomTypeID,
+    roomStatusID: room.RoomStatusID,
+    statusName: statusName, // ส่งค่านี้ไปให้หน้าเว็บใช้แสดงผล
+    areaSqm: Number(room.AreaSqm || 0),
+    description: room.Description,
+    price: Number(room.BaseRent || 0),
+    image: room.ImageUrl
+  };
+});
