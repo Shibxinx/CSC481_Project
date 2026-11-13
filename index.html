@@ -326,37 +326,73 @@
             <div class="border-b pb-4 flex justify-between items-center flex-wrap gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800">แผงควบคุมระบบนิติบุคคล (Admin Panel)</h2>
-                    <p class="text-slate-500 text-sm">จัดการข้อมูลห้องพัก ผู้พักใหม่ และลงประกาศข่าวสารในระบบ</p>
+                    <p class="text-slate-500 text-sm">จัดการข้อมูลห้องพัก ผู้พักใหม่ ออกใบแจ้งหนี้ และลงประกาศข่าวสารในระบบ</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openModal('add-room-modal')"
-                        class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 shadow-sm">
+                    <button onclick="openModal('add-room-modal')" class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 shadow-sm">
                         <i class="fa-solid fa-plus mr-2"></i>เพิ่มห้องพักใหม่
                     </button>
-                    <button onclick="openModal('add-user-modal')"
-                        class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 shadow-sm">
+                    <button onclick="openModal('add-user-modal')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 shadow-sm">
                         <i class="fa-solid fa-user-plus mr-2"></i>เพิ่มผู้ใช้งานใหม่
                     </button>
                 </div>
             </div>
 
-            <!-- ฟอร์มลงประกาศข่าวสาร -->
-            <div class="bg-white p-6 rounded-2xl border shadow-sm max-w-2xl space-y-4">
-                <h3 class="font-bold text-slate-800 text-lg flex items-center"><i
-                        class="fa-solid fa-bullhorn text-brand-600 mr-2"></i>ลงประกาศข่าวสารใหม่</h3>
-                <form id="news-form" onsubmit="handleCreateNews(event)" class="space-y-3">
-                    <input type="text" id="news-title" placeholder="หัวข้อประกาศ..." required
-                        class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
-                    <select id="news-type" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
-                        <option value="General">ทั่วไป (General)</option>
-                        <option value="Maintenance">ซ่อมบำรุง (Maintenance)</option>
-                        <option value="Urgent">ด่วนมาก (Urgent)</option>
-                    </select>
-                    <textarea id="news-content" placeholder="รายละเอียดเนื้อหา..." rows="3" required
-                        class="w-full border p-2.5 rounded-lg text-sm bg-slate-50"></textarea>
-                    <button type="submit"
-                        class="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800">เผยแพร่ประกาศ</button>
-                </form>
+            <!-- ส่วนฟอร์มการจัดการ (จัดเป็น 2 คอลัมน์: ออกใบแจ้งหนี้ & ลงประกาศข่าวสาร) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- 1. ฟอร์มออกใบแจ้งหนี้ค่าห้อง - ค่าน้ำ - ค่าไฟ (เพิ่มใหม่) -->
+                <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-lg flex items-center border-b pb-3">
+                        <i class="fa-solid fa-file-invoice text-brand-600 mr-2"></i>ออกใบแจ้งหนี้ค่าห้อง - ค่าน้ำ - ค่าไฟ
+                    </h3>
+                    <form id="invoice-form" onsubmit="handleCreateInvoice(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">เลือกห้องพัก</label>
+                            <select id="inv-room-id" required class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
+                                <option value="">-- เลือกห้องพัก --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">หน่วยใช้น้ำ (ยูนิต)</label>
+                                <input type="number" id="inv-water-units" value="0" min="0" required class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">หน่วยใช้ไฟ (ยูนิต)</label>
+                                <input type="number" id="inv-electric-units" value="0" min="0" required class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">รอบเดือนประจำงวด</label>
+                            <input type="month" id="inv-billing-month" value="2026-11" required class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
+                        </div>
+
+                        <button type="submit" id="btn-submit-invoice" class="w-full bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-xl text-sm font-medium transition-colors shadow-sm">
+                            บันทึกใบแจ้งหนี้
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 2. ฟอร์มลงประกาศข่าวสาร (ของเดิม) -->
+                <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-lg flex items-center border-b pb-3">
+                        <i class="fa-solid fa-bullhorn text-brand-600 mr-2"></i>ลงประกาศข่าวสารใหม่
+                    </h3>
+                    <form id="news-form" onsubmit="handleCreateNews(event)" class="space-y-3">
+                        <input type="text" id="news-title" placeholder="หัวข้อประกาศ..." required class="w-full border p-2.5 rounded-xl text-sm bg-slate-50">
+                        <select id="news-type" class="w-full border p-2.5 rounded-xl text-sm bg-slate-50">
+                            <option value="General">ทั่วไป (General)</option>
+                            <option value="Maintenance">ซ่อมบำรุง (Maintenance)</option>
+                            <option value="Urgent">ด่วนมาก (Urgent)</option>
+                        </select>
+                        <textarea id="news-content" placeholder="รายละเอียดเนื้อหา..." rows="3" required class="w-full border p-2.5 rounded-xl text-sm bg-slate-50"></textarea>
+                        <button type="submit" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors">เผยแพร่ประกาศ</button>
+                    </form>
+                </div>
+
             </div>
 
             <!-- ตารางจัดการห้องพักสำหรับ Admin -->
@@ -1128,6 +1164,50 @@
             toast.classList.remove('-translate-y-20', 'opacity-0');
             setTimeout(() => toast.classList.add('-translate-y-20', 'opacity-0'), 3000);
         }
+
+        function populateInvoiceRoomSelect() {
+    const select = document.getElementById('inv-room-id');
+    if (!select) return;
+    select.innerHTML = '<option value="">-- เลือกห้องพัก --</option>' + 
+        rooms.map(r => `<option value="${r.id}">ห้อง ${r.roomNumber} (ค่าเช่า ฿${Number(r.price || 0).toLocaleString()} | ${r.areaSqm || 0} ตร.ม.)</option>`).join('');
+}
+
+// เรียกใช้งานฟังก์ชันเติม Dropdown เมื่อโหลดห้องพักสำเร็จ (ใส่ไว้ในฟังก์ชัน fetchRooms เดิม)
+// ตัวอย่าง: ภายใน fetchRooms() หลังจากได้ rooms มาแล้ว ให้เรียก populateInvoiceRoomSelect(); เพิ่มเข้าไป
+
+// ฟังก์ชันกดปุ่มบันทึกใบแจ้งหนี้
+async function handleCreateInvoice(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-invoice');
+    const roomId = document.getElementById('inv-room-id').value;
+    const waterUnits = document.getElementById('inv-water-units').value;
+    const electricUnits = document.getElementById('inv-electric-units').value;
+    const billingMonth = document.getElementById('inv-billing-month').value;
+
+    if (!roomId) return showToast('กรุณาเลือกห้องพัก');
+
+    btn.disabled = true;
+    btn.innerText = 'กำลังบันทึก...';
+
+    try {
+        const res = await fetch(`${API_URL}/invoices`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomId, billingMonth, waterUnits, electricUnits })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'บันทึกใบแจ้งชำระไม่สำเร็จ');
+
+        document.getElementById('invoice-form').reset();
+        document.getElementById('inv-billing-month').value = '2026-11';
+        showToast(`บันทึกใบแจ้งชำระสำเร็จ (ยอดรวม ฿${Number(data.totalAmount).toLocaleString()})`);
+    } catch (err) {
+        showToast(err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'บันทึกใบแจ้งชำระ';
+    }
+}
     </script>
 </body>
 
