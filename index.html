@@ -1089,43 +1089,22 @@
             document.getElementById('result').style.display = 'block';
         }
 
-        async function fetchRepairs() {
+        async function updateRepairStatus(requestId, statusId) {
             try {
-                const url = `${API_URL}/repairs?roleId=${currentUser.roleId}&roomId=${currentUser.roomId || ''}`;
-                const res = await fetch(url);
-                const repairs = await res.json();
-                const isAdmin = currentUser.roleId === 1;
+                const res = await fetch(`${API_URL}/repairs/${requestId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repairStatusId: Number(statusId) })
+                });
 
-                document.getElementById('maintenance-list').innerHTML = repairs.map(r => `
-            <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-3">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <span class="text-xs text-brand-600 font-semibold">ห้อง ${r.roomNumber}</span>
-                        <h3 class="font-bold text-base text-slate-800">${r.title}</h3>
-                    </div>
-                    <span class="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full font-semibold">${r.statusName}</span>
-                </div>
-                <p class="text-xs text-slate-600">${r.description || '-'}</p>
-                
-                ${isAdmin ? `
-                    <div class="pt-2 border-t flex items-center justify-between gap-2">
-                        <span class="text-[11px] text-slate-400">เปลี่ยนสถานะ:</span>
-                        <select onchange="updateRepairStatus(${r.id}, this.value)" class="border text-xs p-1.5 rounded-lg bg-slate-50 font-medium">
-                            <option value="1" ${Number(r.repairStatusID) === 1 ? 'selected' : ''}>รอดำเนินการ</option>
-                            <option value="2" ${Number(r.repairStatusID) === 2 ? 'selected' : ''}>รับเรื่องแล้ว</option>
-                            <option value="3" ${Number(r.repairStatusID) === 3 ? 'selected' : ''}>กำลังดำเนินการ</option>
-                            <option value="4" ${Number(r.repairStatusID) === 4 ? 'selected' : ''}>ซ่อมเสร็จสิ้น</option>
-                        </select>
-                    </div>
-                ` : ''}
+                if (!res.ok) throw new Error('ไม่สามารถอัปเดตสถานะได้');
 
-                <div class="flex justify-between text-xs text-slate-400 pt-2 border-t">
-                    <span>ความสำคัญ: ${r.priority}</span>
-                    <span>แจ้งเมื่อ: ${r.reportDate.split('T')[0]}</span>
-                </div>
-            </div>
-        `).join('');
-            } catch (err) { console.error(err); }
+                showToast('อัปเดตสถานะการซ่อมเรียบร้อย');
+                fetchRepairs();
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, 'error');
+            }
         }
 
         async function updateRepairStatus(requestId, statusId) {
@@ -1229,7 +1208,7 @@
 
                 if (!res.ok) throw new Error('แจ้งซ่อมไม่สำเร็จ');
 
-                closeModal('repair-modal'); 
+                closeModal('repair-modal');
                 titleEl.value = '';
                 descEl.value = '';
 
