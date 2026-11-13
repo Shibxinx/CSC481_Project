@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 export default async (req, context) => {
-  // 1. หน้าห้องใช้ GET Method ในการดึงข้อมูล
   if (req.method !== 'GET') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { 
       headers: { "Content-Type": "application/json" },
@@ -12,7 +11,6 @@ export default async (req, context) => {
   }
 
   try {
-    // 2. ดึงข้อมูลรายการห้องทั้งหมดจากตาราง 'room' ใน Supabase
     const { data, error } = await supabase
       .from('room')
       .select('*');
@@ -21,8 +19,21 @@ export default async (req, context) => {
       throw error;
     }
 
-    // 3. ส่งข้อมูลกลับไปให้หน้าเว็บเป็น JSON Array ตรงๆ
-    return new Response(JSON.stringify(data), {
+    // แปลงชื่อฟิลด์จาก Database ให้ตรงกับที่ Frontend คาดหวัง
+    const formattedRooms = data.map(room => ({
+      roomID: room.RoomID,
+      buildingID: room.BuildingID,
+      roomNumber: room.RoomNumber,
+      floor: room.Floor,
+      roomTypeID: room.RoomTypeID,
+      roomStatusID: room.RoomStatusID,
+      areaSqm: room.AreaSqm,
+      description: room.Description,
+      price: room.BaseRent,
+      imageUrl: room.ImageUrl
+    }));
+
+    return new Response(JSON.stringify(formattedRooms), {
       headers: { "Content-Type": "application/json" },
       status: 200
     });
