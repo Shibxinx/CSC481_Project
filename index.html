@@ -306,9 +306,9 @@
                     <h2 class="text-2xl font-bold text-slate-800">ระบบแจ้งซ่อม</h2>
                     <p class="text-slate-500 text-sm">ผู้เช่าเห็นเฉพาะรายการแจ้งซ่อมของห้องตนเอง แอดมินเห็นทุกรายการ</p>
                 </div>
-                <button onclick="openModal('add-repair-modal')" id="btn-open-repair"
-                    class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 hidden items-center shadow-sm">
-                    <i class="fa-solid fa-plus mr-2"></i>แจ้งซ่อมใหม่
+                <button onclick="openRepairModal()"
+                    class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium">
+                    <i class="fa-solid fa-wrench mr-2"></i> แจ้งซ่อมอุปกรณ์
                 </button>
             </div>
             <div id="maintenance-locked-msg"
@@ -635,7 +635,6 @@
             </div>
 
             <form id="repair-form" onsubmit="handleCreateRepair(event)" class="space-y-4">
-                <!-- 👉 เพิ่มช่องเลือกห้องพักตรงนี้ -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1.5">เลือกห้องพัก</label>
                     <select id="repair-room-id" required
