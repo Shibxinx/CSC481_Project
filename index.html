@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Condominium Manager System - ระบบจัดการคอนโดมิเนียม</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Kanit -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff', 100: '#e0effe', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .container-calc { max-width: 100%; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .btn-calculate-large { 
+            width: 100%; padding: 14px; background-color: #0284c7; color: white; border: none; border-radius: 10px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; transition: background-color 0.2s;
+        }
+        .btn-calculate-large:hover { background-color: #0369a1; }
+        .result-card { margin-top: 15px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .result-item { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px; }
+        .total { font-size: 1.1em; font-weight: bold; color: #0284c7; border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 8px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center gap-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer shrink-0" onclick="switchTab('rooms')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-sky-400 flex items-center justify-center text-white shadow-md shrink-0">
+                        <i class="fa-solid font-bold fa-building text-xl"></i>
+                    </div>
+                    <div class="whitespace-nowrap">
+                        <span class="text-lg lg:text-xl font-bold bg-gradient-to-r from-brand-700 to-sky-600 bg-clip-text text-transparent block leading-tight">Condo Manager</span>
+                        <span class="block text-[11px] text-slate-400 font-normal">ระบบจัดการคอนโดมิเนียม</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <button onclick="switchTab('rooms')" id="nav-rooms" class="nav-btn whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:text-brand-600 hover:bg-slate-50">
+                        <i class="fa-solid fa-bed mr-1.5"></i>รายการห้องพัก
+                    </button>
+                    <button onclick="switchTab('news')" id="nav-news" class="nav-btn whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50">
+                        <i class="fa-solid fa-bullhorn mr-1.5"></i>ข่าวสาร & ประกาศ
+                    </button>
+                    <button onclick="switchTab('utilities')" id="nav-utilities" class="nav-btn whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50">
+                        <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i>ชำระค่าน้ำ-ค่าไฟ
+                    </button>
+                    <button onclick="switchTab('maintenance')" id="nav-maintenance" class="nav-btn whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50">
+                        <i class="fa-solid fa-wrench mr-1.5"></i>แจ้งซ่อม
+                    </button>
+                    <button onclick="switchTab('admin')" id="nav-admin" class="nav-btn whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium text-brand-700 bg-brand-50/70 hover:bg-brand-100 hidden border border-brand-200">
+                        <i class="fa-solid fa-user-shield mr-1.5"></i>ระบบนิติบุคคล
+                    </button>
+                </nav>
+
+                <!-- Right Top Bar -->
+                <div class="flex items-center space-x-2.5 shrink-0">
+                    <div id="user-status-display" class="hidden items-center space-x-2 bg-slate-100 border border-slate-200/80 px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-700 whitespace-nowrap">
+                        <i class="fa-solid fa-user-circle text-brand-600 text-sm"></i>
+                        <span id="current-user-name">-</span>
+                    </div>
+                    <button id="auth-action-btn" onclick="openLoginModal()" class="whitespace-nowrap bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors shadow-sm shrink-0">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i>เข้าสู่ระบบ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+            <span id="toast-message" class="text-sm font-medium">ทำรายการสำเร็จ</span>
+        </div>
+
+        <!-- ==================== TAB 1: ROOMS ==================== -->
+        <section id="tab-rooms" class="tab-content active space-y-6">
+            <div class="bg-gradient-to-r from-brand-900 via-brand-700 to-sky-800 text-white p-8 md:p-12 rounded-2xl shadow-xl">
+                <h1 class="text-3xl md:text-4xl font-bold mb-2">ค้นหาห้องพักและคอนโดมิเนียม</h1>
+                <p class="text-slate-200 text-sm md:text-base">คลิกที่การ์ดห้องพักเพื่อดูรายละเอียดข้อมูลเชิงลึกได้ทันที</p>
+            </div>
+            
+            <!-- ช่องค้นหา + ฟิลเตอร์สถานะห้อง -->
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl border shadow-sm">
+                <div class="w-full md:w-96 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400"></i>
+                    <input type="text" id="search-room" oninput="filterRooms()" placeholder="ค้นหาเลขห้อง หรือ อาคาร..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                </div>
+                <!-- Dropdown Filter สถานะห้อง -->
+                <div class="w-full md:w-auto flex items-center space-x-2">
+                    <span class="text-xs font-semibold text-slate-500 whitespace-nowrap">สถานะห้อง:</span>
+                    <select id="status-filter" onchange="filterRooms()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg p-2 outline-none focus:ring-2 focus:ring-brand-500">
+                        <option value="ALL">ทั้งหมด</option>
+                        <option value="ว่าง">ห้องว่าง</option>
+                        <option value="จองแล้ว">จองแล้ว</option>
+                        <option value="เช่าอยู่">เช่าอยู่</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="room-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- ==================== TAB 2: NEWS ==================== -->
+        <section id="tab-news" class="tab-content space-y-6">
+            <div class="border-b pb-4">
+                <h2 class="text-2xl font-bold text-slate-800">ข่าวสาร & ประกาศจากนิติบุคคล</h2>
+                <p class="text-slate-500 text-sm">ข้อมูลประกาศสิทธิประโยชน์ และการซ่อมบำรุงภายในอาคาร</p>
+            </div>
+            <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
+
+        <!-- ==================== TAB 3: UTILITIES ==================== -->
+        <section id="tab-utilities" class="tab-content space-y-6">
+            <div class="border-b pb-4">
+                <h2 class="text-2xl font-bold text-slate-800">ตรวจสอบค่าน้ำ-ค่าไฟ และชำระเงิน</h2>
+                <p class="text-slate-500 text-sm">ระบบตรวจสอบยอดค่าใช้จ่ายประจำเดือนและการชำระเงินผ่าน QR Code</p>
+            </div>
+            <div id="utility-locked-msg" class="bg-amber-50 border border-amber-200 p-8 rounded-2xl text-amber-800 text-center hidden">
+                <i class="fa-solid fa-lock text-4xl mb-3"></i>
+                <p class="font-bold text-lg">กรุณาเข้าสู่ระบบก่อนจึงจะสามารถตรวจสอบค่าน้ำ-ค่าไฟประจำห้องได้</p>
+                <button onclick="openLoginModal()" class="mt-4 bg-amber-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-amber-700 shadow">เข้าสู่ระบบตอนนี้</button>
+            </div>
+
+            <div id="utility-content-area" class="grid grid-cols-1 lg:grid-cols-2 gap-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-lg border-b pb-2"><i class="fa-solid fa-file-invoice text-brand-600 mr-2"></i>บิลค่าน้ำ-ค่าไฟประจำเดือน</h3>
+                    
+                    <div id="admin-utility-search" class="hidden space-y-2">
+                        <label class="block text-xs font-semibold text-slate-600">ค้นหาหมายเลขห้อง (มุมมอง Admin)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="admin-target-room" placeholder="เช่น A101" class="border p-2 rounded-lg text-sm flex-grow uppercase bg-slate-50">
+                            <button onclick="fetchUtilityBillForAdmin()" class="bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700">ตรวจสอบ</button>
+                            <button onclick="refreshCurrentUtilityBill()" class="bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-300"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border">
+                        <div>
+                            <p class="text-xs text-slate-500">ห้องพักของคุณ</p>
+                            <h3 id="utility-room-number" class="text-xl font-bold text-brand-600">-</h3>
+                        </div>
+                    </div>
+                    
+                    <div id="utility-details" class="space-y-3 text-sm"></div>
+
+                    <div id="payment-btn-container" class="pt-2 hidden">
+                        <button onclick="openQrPaymentModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-medium text-sm transition-colors shadow-sm flex items-center justify-center">
+                            <i class="fa-solid fa-qrcode mr-2 text-base"></i>ชำระเงินผ่าน QR Code (PromptPay)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="container-calc">
+                    <h3 class="font-bold text-slate-800 text-lg border-b pb-2 mb-4"><i class="fa-solid fa-calculator text-brand-600 mr-2"></i>จำลองคำนวณค่าน้ำค่าไฟ</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">ค่าเช่าห้องปัจจุบัน (บาท)</label>
+                            <input type="number" id="roomRent" value="4500" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">หน่วยไฟที่ใช้</label>
+                                <input type="number" id="electricUnits" placeholder="เช่น 120" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                                <span class="text-[10px] text-slate-400">อัตรา 7 บ./หน่วย</span>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">หน่วยน้ำที่ใช้</label>
+                                <input type="number" id="waterUnits" placeholder="เช่น 5" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                                <span class="text-[10px] text-slate-400">อัตรา 10 บ./หน่วย</span>
+                            </div>
+                        </div>
+                        <button onclick="calculateTotal()" class="btn-calculate-large mt-2">คำนวณยอดชำระสุทธิ</button>
+                        <div class="result-card" id="result" style="display:none;">
+                            <div class="result-item"><span>ค่าเช่าห้อง:</span> <span id="resRoom">0</span> บาท</div>
+                            <div class="result-item"><span>ค่าไฟ:</span> <span id="resElectric">0</span> บาท</div>
+                            <div class="result-item"><span>ค่าน้ำ:</span> <span id="resWater">0</span> บาท</div>
+                            <div class="result-item total"><span>รวมทั้งหมด:</span> <span id="resTotal">0</span> บาท</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: MAINTENANCE ==================== -->
+        <section id="tab-maintenance" class="tab-content space-y-6">
+            <div class="border-b pb-4 flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">ระบบแจ้งซ่อม</h2>
+                    <p class="text-slate-500 text-sm">ผู้เช่าเห็นเฉพาะรายการแจ้งซ่อมของห้องตนเอง แอดมินเห็นทุกรายการ</p>
+                </div>
+                <button onclick="openModal('add-repair-modal')" id="btn-open-repair" class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 hidden items-center shadow-sm">
+                    <i class="fa-solid fa-plus mr-2"></i>แจ้งซ่อมใหม่
+                </button>
+            </div>
+            <div id="maintenance-locked-msg" class="bg-amber-50 border border-amber-200 p-8 rounded-2xl text-amber-800 text-center hidden">
+                <i class="fa-solid fa-lock text-4xl mb-3"></i>
+                <p class="font-bold text-lg">กรุณาเข้าสู่ระบบเพื่อทำรายการแจ้งซ่อมและดูประวัติการซ่อม</p>
+                <button onclick="openLoginModal()" class="mt-4 bg-amber-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-amber-700 shadow">เข้าสู่ระบบตอนนี้</button>
+            </div>
+            <div id="maintenance-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <!-- ==================== TAB 5: ADMIN PANEL ==================== -->
+        <section id="tab-admin" class="tab-content space-y-8">
+            <div class="border-b pb-4 flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">แผงควบคุมระบบนิติบุคคล (Admin Panel)</h2>
+                    <p class="text-slate-500 text-sm">จัดการข้อมูลห้องพัก ผู้พักใหม่ และลงประกาศข่าวสารในระบบ</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openModal('add-room-modal')" class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 shadow-sm">
+                        <i class="fa-solid fa-plus mr-2"></i>เพิ่มห้องพักใหม่
+                    </button>
+                    <button onclick="openModal('add-user-modal')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 shadow-sm">
+                        <i class="fa-solid fa-user-plus mr-2"></i>เพิ่มผู้ใช้งานใหม่
+                    </button>
+                </div>
+            </div>
+
+            <!-- ฟอร์มลงประกาศข่าวสาร -->
+            <div class="bg-white p-6 rounded-2xl border shadow-sm max-w-2xl space-y-4">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center"><i class="fa-solid fa-bullhorn text-brand-600 mr-2"></i>ลงประกาศข่าวสารใหม่</h3>
+                <form id="news-form" onsubmit="handleCreateNews(event)" class="space-y-3">
+                    <input type="text" id="news-title" placeholder="หัวข้อประกาศ..." required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                    <select id="news-type" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                        <option value="General">ทั่วไป (General)</option>
+                        <option value="Maintenance">ซ่อมบำรุง (Maintenance)</option>
+                        <option value="Urgent">ด่วนมาก (Urgent)</option>
+                    </select>
+                    <textarea id="news-content" placeholder="รายละเอียดเนื้อหา..." rows="3" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50"></textarea>
+                    <button type="submit" class="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800">เผยแพร่ประกาศ</button>
+                </form>
+            </div>
+
+            <!-- ตารางจัดการห้องพักสำหรับ Admin -->
+            <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-lg">รายการห้องพักทั้งหมดใน Database</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b text-xs font-semibold text-slate-500 uppercase">
+                                <th class="p-4">ห้องพัก</th>
+                                <th class="p-4">อาคาร / ชั้น</th>
+                                <th class="p-4">สถานะ</th>
+                                <th class="p-4">ราคา/เดือน</th>
+                                <th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-rooms-table" class="divide-y text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: QR CODE PAYMENT -->
+    <div id="qr-payment-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 relative shadow-2xl text-center space-y-4">
+            <button onclick="closeModal('qr-payment-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-bold text-slate-800">สแกนเพื่อชำระเงิน (PromptPay QR)</h3>
+            <p class="text-xs text-slate-500">ใช้แอปพลิเคชันธนาคารใดก็ได้สแกนเพื่อชำระค่าน้ำ-ค่าไฟ</p>
+            <div class="bg-slate-100 p-4 rounded-xl inline-block border">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=CondoManager-PromptPay-Payment" alt="QR Code" class="w-48 h-48 mx-auto rounded-lg">
+            </div>
+            <div>
+                <p id="qr-total-amount" class="text-lg font-bold text-brand-600">ยอดชำระ: ฿0</p>
+                <p class="text-[11px] text-slate-400 mt-1">สแกนแล้วระบบจะตรวจสอบและอัปเดตสถานะอัตโนมัติ</p>
+            </div>
+            <button onclick="confirmPayment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-medium text-sm shadow">จำลองการชำระเงินสำเร็จ</button>
+        </div>
+    </div>
+
+    <!-- MODAL: ROOM DETAIL -->
+    <div id="room-detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 relative shadow-2xl space-y-4">
+            <button onclick="closeModal('room-detail-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div id="modal-room-content" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT ROOM (สำหรับนิติแก้ไขข้อมูลห้อง) -->
+    <div id="edit-room-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 relative shadow-2xl space-y-4">
+            <button onclick="closeModal('edit-room-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-bold text-slate-800 border-b pb-2">แก้ไขข้อมูลห้องพัก</h3>
+            <form id="edit-room-form" onsubmit="handleUpdateRoom(event)" class="space-y-3">
+                <input type="hidden" id="edit-room-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">หมายเลขห้อง</label>
+                    <input type="text" id="edit-room-number" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50 uppercase">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">ชั้น</label>
+                        <input type="number" id="edit-room-floor" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">ราคาค่าเช่า (บาท)</label>
+                        <input type="number" id="edit-room-price" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">สถานะห้องพัก</label>
+                    <select id="edit-room-status" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                        <option value="ว่าง">ห้องว่าง</option>
+                        <option value="จองแล้ว">จองแล้ว</option>
+                        <option value="เช่าอยู่">เช่าอยู่</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">รายละเอียด</label>
+                    <textarea id="edit-room-desc" rows="3" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-xl font-medium text-sm shadow">บันทึกการแก้ไข</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: LOGIN -->
+    <div id="login-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 relative shadow-2xl">
+            <button onclick="closeModal('login-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">เข้าสู่ระบบ</h3>
+            <div id="login-error" class="hidden mb-3 p-2 bg-rose-50 text-rose-600 text-xs rounded border border-rose-200"></div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+                    <input type="text" id="login-username" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                    <input type="password" id="login-password" required class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                </div>
+                <button type="submit" class="w-full bg-brand-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-brand-700 shadow">เข้าสู่ระบบ</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD ROOM -->
+    <div id="add-room-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
+            <button onclick="closeModal('add-room-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">เพิ่มห้องพักใหม่</h3>
+            <form onsubmit="handleAddRoom(event)" class="space-y-3">
+                <input type="text" id="new-room-number" placeholder="หมายเลขห้อง (เช่น A104)" required class="w-full border p-2.5 rounded-lg text-sm uppercase bg-slate-50">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="new-building-id" placeholder="Building ID (1-3)" value="1" required class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                    <input type="number" id="new-room-floor" placeholder="ชั้น" value="1" required class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="new-type-id" placeholder="Room Type ID (1-4)" value="1" required class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                    <input type="number" id="new-room-price" placeholder="ราคาค่าเช่า" required class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                </div>
+                <input type="text" id="new-room-desc" placeholder="รายละเอียดห้อง" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
+                <button type="submit" class="w-full bg-brand-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-brand-700 shadow">บันทึกห้องพัก</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD USER / NEW TENANT -->
+    <div id="add-user-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 relative shadow-2xl">
+            <button onclick="closeModal('add-user-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4">เพิ่มผู้ใช้งานใหม่ / ผู้พักใหม่ (นิติบุคคล)</h3>
+            <form onsubmit="handleRegisterUser(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="reg-firstname" placeholder="ชื่อจริง" required class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                    <input type="text" id="reg-lastname" placeholder="นามสกุล" required class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="reg-phone" placeholder="เบอร์โทรศัพท์" class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                    <input type="email" id="reg-email" placeholder="อีเมล" class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="reg-username" placeholder="Username สำหรับล็อกอิน" required class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                    <input type="password" id="reg-password" placeholder="Password" required class="border p-2.5 rounded-lg text-sm bg-slate-50">
+                </div>
+                <input type="text" id="reg-roomnumber" placeholder="หมายเลขห้องที่เข้าพัก (เช่น A101)" class="border p-2.5 rounded-lg text-sm w-full bg-slate-50 uppercase">
+                <button type="submit" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-emerald-700 shadow">บันทึกผู้ใช้งานใหม่</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD REPAIR REQUEST -->
+    <div id="add-repair-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
+            <button onclick="closeModal('add-repair-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-bold text-slate-800 mb-4">แจ้งซ่อมอุปกรณ์</h3>
+            <form onsubmit="handleCreateRepair(event)" class="space-y-3">
+                <input type="text" id="repair-title" placeholder="หัวข้อปัญหา (เช่น แอร์ไม่เย็น)" required class="border p-2.5 rounded-lg text-sm w-full bg-slate-50">
+                <textarea id="repair-desc" placeholder="รายละเอียดเพิ่มเติม..." rows="3" class="border p-2.5 rounded-lg text-sm w-full bg-slate-50"></textarea>
+                <select id="repair-priority" class="border p-2.5 rounded-lg text-sm w-full bg-slate-50">
+                    <option value="Normal">ปกติ (Normal)</option>
+                    <option value="High">ด่วน (High)</option>
+                    <option value="Urgent">ด่วนที่สุด (Urgent)</option>
+                </select>
+                <button type="submit" class="w-full bg-brand-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-brand-700 shadow">ส่งเรื่องแจ้งซ่อม</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let currentUser = JSON.parse(localStorage.getItem('condo_user')) || null;
+        let rooms = [];
+        let currentViewingRoomNumber = null;
+        let currentBillTotalAmount = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateAuthUI();
+            fetchRooms();
+            fetchNews();
+        });
+
+        function switchTab(tabId) {
+            if (tabId === 'utilities' || tabId === 'maintenance') {
+                const lockedMsg = tabId === 'utilities' ? document.getElementById('utility-locked-msg') : document.getElementById('maintenance-locked-msg');
+                const contentArea = tabId === 'utilities' ? document.getElementById('utility-content-area') : null;
+
+                if (!currentUser) {
+                    lockedMsg?.classList.remove('hidden');
+                    if (contentArea) contentArea.classList.add('hidden');
+                } else {
+                    lockedMsg?.classList.add('hidden');
+                    if (contentArea) contentArea.classList.remove('hidden');
+
+                    if (tabId === 'utilities') {
+                        const adminSearchEl = document.getElementById('admin-utility-search');
+                        if (currentUser.roleId === 1) {
+                            adminSearchEl?.classList.remove('hidden');
+                            const adminInput = document.getElementById('admin-target-room');
+                            if (adminInput) adminInput.value = '';
+                            currentViewingRoomNumber = null;
+                            document.getElementById('utility-room-number').innerText = '-';
+                            document.getElementById('utility-details').innerHTML = `<p class="text-slate-500 text-center">กรุณากรอกหมายเลขห้องที่ต้องการตรวจสอบด้านบน</p>`;
+                            document.getElementById('payment-btn-container')?.classList.add('hidden');
+                        } else {
+                            adminSearchEl?.classList.add('hidden');
+                            currentViewingRoomNumber = currentUser.roomNumber;
+                            fetchUtilityBill(currentUser.roomNumber);
+                        }
+                    }
+                    if (tabId === 'maintenance') fetchRepairs();
+                }
+            }
+
+            if (tabId === 'admin' && (!currentUser || currentUser.roleId !== 1)) {
+                showToast('สำหรับผู้ดูแลระบบ (Admin) เท่านั้น', 'error');
+                return;
+            }
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            if (tabId === 'admin') renderAdminRoomsTable();
+        }
+
+        function updateAuthUI() {
+            const statusEl = document.getElementById('user-status-display');
+            const nameEl = document.getElementById('current-user-name');
+            const btnEl = document.getElementById('auth-action-btn');
+            const navAdmin = document.getElementById('nav-admin');
+            const btnOpenRepair = document.getElementById('btn-open-repair');
+
+            if (currentUser) {
+                statusEl.classList.remove('hidden');
+                statusEl.classList.add('flex');
+                
+                if (currentUser.roleId === 1) {
+                    nameEl.innerText = 'ผู้ดูแลระบบ (Admin)';
+                } else {
+                    const roomText = currentUser.roomNumber ? ` • ห้อง ${currentUser.roomNumber}` : '';
+                    nameEl.innerText = `${currentUser.name} (${currentUser.roleName})${roomText}`;
+                }
+
+                btnEl.innerHTML = `<i class="fa-solid fa-right-from-bracket mr-1.5"></i>ออกจากระบบ`;
+                btnEl.className = "whitespace-nowrap bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors shadow-sm shrink-0";
+                btnEl.onclick = handleLogout;
+                btnOpenRepair.classList.remove('hidden');
+
+                if (currentUser.roleId === 1) {
+                    navAdmin.classList.remove('hidden');
+                } else {
+                    navAdmin.classList.add('hidden');
+                }
+            } else {
+                statusEl.classList.add('hidden');
+                statusEl.classList.remove('flex');
+                btnEl.innerHTML = `<i class="fa-solid fa-right-to-bracket mr-1.5"></i>เข้าสู่ระบบ`;
+                btnEl.className = "whitespace-nowrap bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium px-4 py-2 rounded-xl transition-colors shadow-sm shrink-0";
+                btnEl.onclick = openLoginModal;
+                navAdmin.classList.add('hidden');
+                btnOpenRepair.classList.add('hidden');
+            }
+        }
+
+        async function fetchRooms() {
+            try {
+                const res = await fetch(`${API_URL}/rooms`);
+                rooms = await res.json();
+                renderRooms(rooms);
+                if (currentUser && currentUser.roleId === 1) renderAdminRoomsTable();
+            } catch (err) { console.error(err); }
+        }
+
+        // ฟังก์ชันเรนเดอร์การ์ดห้องพักพร้อมป้ายสถานะ
+        function renderRooms(data) {
+            const grid = document.getElementById('room-grid');
+            grid.innerHTML = data.map(r => {
+                const status = r.statusName || 'ว่าง';
+                let badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                if (status === 'จองแล้ว') badgeColor = 'bg-amber-50 text-amber-600 border-amber-200';
+                if (status === 'เช่าอยู่') badgeColor = 'bg-rose-50 text-rose-600 border-rose-200';
+
+                return `
+                    <div onclick="openRoomDetail(${r.id})" class="bg-white rounded-2xl border shadow-sm overflow-hidden flex flex-col justify-between cursor-pointer hover:shadow-md transition-shadow relative">
+                        <div class="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeColor} shadow-sm backdrop-blur-sm">
+                            ${status}
+                        </div>
+                        <img src="${r.image || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80'}" class="h-48 w-full object-cover">
+                        <div class="p-5 space-y-2">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-lg text-slate-800">ห้อง ${r.roomNumber}</h3>
+                                <span class="text-xs px-2 py-0.5 rounded bg-sky-50 text-brand-600 font-semibold">${r.buildingName || 'อาคารหลัก'}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 line-clamp-2">${r.description || 'ไม่มีรายละเอียด'}</p>
+                            <div class="pt-2 border-t flex justify-between items-center">
+                                <span class="text-brand-600 font-bold text-lg">฿${r.price.toLocaleString()} / เดือน</span>
+                                <span class="text-xs text-slate-400">ชั้น ${r.floor}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ระบบ Filter ค้นหาห้องพักตามคำค้นหาและสถานะห้อง
+        function filterRooms() {
+            const q = document.getElementById('search-room').value.toLowerCase();
+            const selectedStatus = document.getElementById('status-filter').value;
+
+            const filtered = rooms.filter(r => {
+                const matchText = r.roomNumber.toLowerCase().includes(q) || (r.buildingName && r.buildingName.toLowerCase().includes(q));
+                const roomStatus = r.statusName || 'ว่าง';
+                const matchStatus = selectedStatus === 'ALL' || roomStatus === selectedStatus;
+                return matchText && matchStatus;
+            });
+            renderRooms(filtered);
+        }
+
+        async function openRoomDetail(roomId) {
+            try {
+                const res = await fetch(`${API_URL}/rooms/${roomId}`);
+                if (!res.ok) throw new Error('ไม่พบข้อมูลห้อง');
+                const r = await res.json();
+                const isAdmin = currentUser && currentUser.roleId === 1;
+                const status = r.statusName || 'ว่าง';
+
+                document.getElementById('modal-room-content').innerHTML = `
+                    <img src="${r.image || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80'}" class="h-64 w-full object-cover rounded-xl shadow-sm">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-2xl font-bold text-slate-800">ห้อง ${r.roomNumber}</h3>
+                            <span class="text-sm px-3 py-1 rounded-full bg-brand-50 text-brand-600 font-semibold">${r.buildingName || 'อาคารหลัก'} (ชั้น ${r.floor})</span>
+                        </div>
+                        <p class="text-sm text-slate-600">${r.description || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+                        <div class="grid grid-cols-2 gap-3 pt-2 text-sm bg-slate-50 p-3 rounded-xl">
+                            <div><span class="text-slate-400">ขนาดพื้นที่:</span> ${r.areaSqm || '-'} ตร.ม.</div>
+                            <div><span class="text-slate-400">สถานะ:</span> <b class="text-brand-600">${status}</b></div>
+                        </div>
+                        <div class="pt-2 flex justify-between items-center border-t">
+                            <span class="text-xl font-extrabold text-brand-600">฿${r.price.toLocaleString()} / เดือน</span>
+                            ${isAdmin ? `<button onclick="openEditRoomModal(${r.id})" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-xl font-medium shadow"><i class="fa-solid fa-pen-to-square mr-1"></i>แก้ไขข้อมูลห้อง</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                openModal('room-detail-modal');
+            } catch (err) { showToast('ไม่สามารถโหลดข้อมูลห้องได้', 'error'); }
+        }
+
+        // เปิด Modal แก้ไขข้อมูลห้องสำหรับ Admin
+        async function openEditRoomModal(roomId) {
+            closeModal('room-detail-modal');
+            try {
+                const res = await fetch(`${API_URL}/rooms/${roomId}`);
+                if (!res.ok) throw new Error('ไม่พบข้อมูล');
+                const r = await res.json();
+
+                document.getElementById('edit-room-id').value = r.id;
+                document.getElementById('edit-room-number').value = r.roomNumber;
+                document.getElementById('edit-room-floor').value = r.floor;
+                document.getElementById('edit-room-price').value = r.price;
+                document.getElementById('edit-room-status').value = r.statusName || 'ว่าง';
+                document.getElementById('edit-room-desc').value = r.description || '';
+
+                openModal('edit-room-modal');
+            } catch (err) { showToast('ไม่สามารถโหลดข้อมูลห้องเพื่อแก้ไขได้', 'error'); }
+        }
+
+        // บันทึกการแก้ไขห้องพัก
+        async function handleUpdateRoom(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-room-id').value;
+            const body = {
+                roomNumber: document.getElementById('edit-room-number').value,
+                floor: document.getElementById('edit-room-floor').value,
+                price: document.getElementById('edit-room-price').value,
+                statusName: document.getElementById('edit-room-status').value,
+                description: document.getElementById('edit-room-desc').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/rooms/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error('อัปเดตข้อมูลห้องไม่สำเร็จ');
+                closeModal('edit-room-modal');
+                fetchRooms();
+                showToast('อัปเดตข้อมูลห้องพักเรียบร้อย');
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        function renderAdminRoomsTable() {
+            const tbody = document.getElementById('admin-rooms-table');
+            if (!tbody) return;
+            tbody.innerHTML = rooms.map(r => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="p-4 font-bold text-slate-800">${r.roomNumber}</td>
+                    <td class="p-4 text-slate-600">${r.buildingName || 'อาคารหลัก'} (ชั้น ${r.floor})</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">${r.statusName || 'ว่าง'}</span></td>
+                    <td class="p-4 font-semibold text-brand-600">฿${r.price.toLocaleString()}</td>
+                    <td class="p-4 text-center space-x-2">
+                        <button onclick="openEditRoomModal(${r.id})" class="text-amber-500 hover:text-amber-700 p-2"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteRoom(${r.id})" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function handleAddRoom(e) {
+            e.preventDefault();
+            const body = {
+                roomNumber: document.getElementById('new-room-number').value,
+                buildingId: document.getElementById('new-building-id').value,
+                floor: document.getElementById('new-room-floor').value,
+                roomTypeId: document.getElementById('new-type-id').value,
+                price: document.getElementById('new-room-price').value,
+                description: document.getElementById('new-room-desc').value,
+                statusName: 'ว่าง'
+            };
+            try {
+                const res = await fetch(`${API_URL}/rooms`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error('เพิ่มห้องไม่สำเร็จ');
+                closeModal('add-room-modal');
+                fetchRooms();
+                showToast('เพิ่มห้องพักสำเร็จ');
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function deleteRoom(id) {
+            if (!confirm('ยืนยันการลบห้องนี้?')) return;
+            try {
+                const res = await fetch(`${API_URL}/rooms/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('ลบห้องไม่สำเร็จ');
+                fetchRooms();
+                showToast('ลบห้องพักเรียบร้อย');
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function fetchNews() {
+            try {
+                const res = await fetch(`${API_URL}/announcements`);
+                const news = await res.json();
+                document.getElementById('news-container').innerHTML = news.map(n => `
+                    <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-2">
+                        <span class="text-xs px-2 py-1 bg-slate-100 rounded font-semibold text-slate-600">${n.priority}</span>
+                        <h3 class="font-bold text-base text-slate-800">${n.title}</h3>
+                        <p class="text-xs text-slate-600">${n.content}</p>
+                        <p class="text-[10px] text-slate-400">วันที่: ${n.date.split('T')[0]}</p>
+                    </div>
+                `).join('');
+            } catch (err) { console.error(err); }
+        }
+
+        async function fetchUtilityBill(targetRoom) {
+            const roomNo = targetRoom !== undefined ? targetRoom : currentViewingRoomNumber;
+            if (!roomNo) {
+                document.getElementById('utility-details').innerHTML = `<p class="text-slate-500 text-center">กรุณาระบุหมายเลขห้องที่ต้องการตรวจสอบ</p>`;
+                document.getElementById('payment-btn-container')?.classList.add('hidden');
+                return;
+            }
+            currentViewingRoomNumber = roomNo;
+            document.getElementById('utility-room-number').innerText = roomNo;
+            try {
+                const res = await fetch(`${API_URL}/utilities/${roomNo}`);
+                if (!res.ok) throw new Error('ไม่พบข้อมูลบิล');
+                const bill = await res.json();
+                currentBillTotalAmount = Number(bill.WaterAmount) + Number(bill.ElectricAmount);
+
+                document.getElementById('utility-details').innerHTML = `
+                    <div class="bg-slate-50 p-4 rounded-xl space-y-2">
+                        <div class="flex justify-between"><span>รอบบิลเดือน:</span> <b>${bill.BillingMonth}</b></div>
+                        <div class="flex justify-between"><span>ค่าน้ำประปา (${bill.WaterUnits} หน่วย):</span> <b>฿${bill.WaterAmount}</b></div>
+                        <div class="flex justify-between"><span>ค่าไฟฟ้า (${bill.ElectricUnits} หน่วย):</span> <b>฿${bill.ElectricAmount}</b></div>
+                        <div class="flex justify-between border-t pt-2 text-brand-600 font-bold text-base"><span>รวมค่าน้ำ-ไฟ:</span> <span>฿${currentBillTotalAmount}</span></div>
+                    </div>
+                `;
+                document.getElementById('payment-btn-container')?.classList.remove('hidden');
+            } catch (err) {
+                currentBillTotalAmount = 0;
+                document.getElementById('utility-details').innerHTML = `<p class="text-rose-500 text-center">ยังไม่มีข้อมูลบิลค่าน้ำค่าไฟของห้อง ${roomNo} ในรอบนี้</p>`;
+                document.getElementById('payment-btn-container')?.classList.add('hidden');
+            }
+        }
+
+        function refreshCurrentUtilityBill() {
+            const adminInput = document.getElementById('admin-target-room');
+            if (adminInput) adminInput.value = '';
+            currentViewingRoomNumber = null;
+            document.getElementById('utility-room-number').innerText = '-';
+            document.getElementById('utility-details').innerHTML = `<p class="text-slate-500 text-center">กรุณากรอกหมายเลขห้องที่ต้องการตรวจสอบด้านบน</p>`;
+            document.getElementById('payment-btn-container')?.classList.add('hidden');
+            showToast('รีเฟรชข้อมูลบิลเรียบร้อย');
+        }
+
+        function fetchUtilityBillForAdmin() {
+            const roomNo = document.getElementById('admin-target-room').value.trim().toUpperCase();
+            if (roomNo) {
+                fetchUtilityBill(roomNo);
+            } else {
+                refreshCurrentUtilityBill();
+            }
+        }
+
+        function openQrPaymentModal() {
+            document.getElementById('qr-total-amount').innerText = `ยอดชำระสุทธิ: ฿${currentBillTotalAmount.toLocaleString()}`;
+            openModal('qr-payment-modal');
+        }
+
+        function confirmPayment() {
+            closeModal('qr-payment-modal');
+            showToast('ชำระเงินผ่าน QR Code สำเร็จแล้ว');
+        }
+
+        function calculateTotal() {
+            const roomRent = parseFloat(document.getElementById('roomRent').value) || 0;
+            const electricUnits = parseFloat(document.getElementById('electricUnits').value) || 0;
+            const waterUnits = parseFloat(document.getElementById('waterUnits').value) || 0;
+            const electricTotal = electricUnits * 7;
+            const waterTotal = waterUnits * 10;
+            const grandTotal = roomRent + electricTotal + waterTotal;
+
+            document.getElementById('resRoom').innerText = roomRent.toLocaleString();
+            document.getElementById('resElectric').innerText = electricTotal.toLocaleString();
+            document.getElementById('resWater').innerText = waterTotal.toLocaleString();
+            document.getElementById('resTotal').innerText = grandTotal.toLocaleString();
+            document.getElementById('result').style.display = 'block';
+        }
+
+        async function fetchRepairs() {
+            try {
+                const url = `${API_URL}/repairs?roleId=${currentUser.roleId}&roomId=${currentUser.roomId || ''}`;
+                const res = await fetch(url);
+                const repairs = await res.json();
+                const isAdmin = currentUser.roleId === 1;
+
+                document.getElementById('maintenance-list').innerHTML = repairs.map(r => `
+                    <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs text-brand-600 font-semibold">ห้อง ${r.roomNumber}</span>
+                                <h3 class="font-bold text-base text-slate-800">${r.title}</h3>
+                            </div>
+                            <span class="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full font-semibold">${r.statusName}</span>
+                        </div>
+                        <p class="text-xs text-slate-600">${r.description || '-'}</p>
+                        
+                        ${isAdmin ? `
+                            <div class="pt-2 border-t flex items-center justify-between gap-2">
+                                <span class="text-[11px] text-slate-400">เปลี่ยนสถานะ:</span>
+                                <select onchange="updateRepairStatus(${r.id}, this.value)" class="border text-xs p-1.5 rounded-lg bg-slate-50 font-medium">
+                                    <option value="1" ${r.statusName === 'รอดำเนินการ' ? 'selected' : ''}>รอดำเนินการ</option>
+                                    <option value="2" ${r.statusName === 'รับเรื่องแล้ว' ? 'selected' : ''}>รับเรื่องแล้ว</option>
+                                    <option value="3" ${r.statusName === 'กำลังดำเนินการ' ? 'selected' : ''}>กำลังดำเนินการ</option>
+                                    <option value="4" ${r.statusName === 'ซ่อมเสร็จสิ้น' ? 'selected' : ''}>ซ่อมเสร็จสิ้น</option>
+                                </select>
+                            </div>
+                        ` : ''}
+
+                        <div class="flex justify-between text-xs text-slate-400 pt-2 border-t">
+                            <span>ความสำคัญ: ${r.priority}</span>
+                            <span>แจ้งเมื่อ: ${r.reportDate.split('T')[0]}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) { console.error(err); }
+        }
+
+        async function updateRepairStatus(requestId, statusId) {
+            try {
+                const res = await fetch(`${API_URL}/repairs/${requestId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repairStatusId: statusId })
+                });
+                if (!res.ok) throw new Error('อัพเดทสถานะไม่สำเร็จ');
+                showToast('อัพเดทสถานะการซ่อมเรียบร้อย');
+                fetchRepairs();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+
+                currentUser = data.user;
+                localStorage.setItem('condo_user', JSON.stringify(currentUser));
+                closeModal('login-modal');
+                updateAuthUI();
+                showToast('เข้าสู่ระบบสำเร็จ');
+                switchTab('rooms');
+            } catch (err) {
+                const errEl = document.getElementById('login-error');
+                errEl.innerText = err.message;
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('condo_user');
+            updateAuthUI();
+            showToast('ออกจากระบบแล้ว');
+            switchTab('rooms');
+        }
+
+        async function handleRegisterUser(e) {
+            e.preventDefault();
+            const body = {
+                firstName: document.getElementById('reg-firstname').value,
+                lastName: document.getElementById('reg-lastname').value,
+                phone: document.getElementById('reg-phone').value,
+                email: document.getElementById('reg-email').value,
+                username: document.getElementById('reg-username').value,
+                password: document.getElementById('reg-password').value,
+                roomNumber: document.getElementById('reg-roomnumber').value
+            };
+            try {
+                const res = await fetch(`${API_URL}/users/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error('ลงทะเบียนไม่สำเร็จ');
+                closeModal('add-user-modal');
+                showToast('เพิ่มผู้ใช้งานใหม่และผูกห้องสำเร็จ');
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function handleCreateRepair(e) {
+            e.preventDefault();
+            if (!currentUser.roomId) return showToast('บัญชีนี้ยังไม่ได้ผูกกับห้องพัก', 'error');
+            try {
+                const res = await fetch(`${API_URL}/repairs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        roomId: currentUser.roomId,
+                        title: document.getElementById('repair-title').value,
+                        description: document.getElementById('repair-desc').value,
+                        priority: document.getElementById('repair-priority').value
+                    })
+                });
+                if (!res.ok) throw new Error('แจ้งซ่อมไม่สำเร็จ');
+                closeModal('add-repair-modal');
+                fetchRepairs();
+                showToast('ส่งเรื่องแจ้งซ่อมเรียบร้อย');
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function handleCreateNews(e) {
+            e.preventDefault();
+            try {
+                const res = await fetch(`${API_URL}/announcements`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: currentUser.userId || 101,
+                        title: document.getElementById('news-title').value,
+                        announcementType: document.getElementById('news-type').value,
+                        content: document.getElementById('news-content').value
+                    })
+                });
+                if (!res.ok) throw new Error('ลงประกาศไม่สำเร็จ');
+                document.getElementById('news-form').reset();
+                fetchNews();
+                showToast('ลงประกาศข่าวสารสำเร็จ');
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        function openLoginModal() {
+            document.getElementById('login-error').classList.add('hidden');
+            openModal('login-modal');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+    </script>
+</body>
+</html>
