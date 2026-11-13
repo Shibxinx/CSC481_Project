@@ -371,7 +371,7 @@
                         </div>
 
                         <button type="submit" id="btn-submit-invoice" class="w-full bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-xl text-sm font-medium transition-colors shadow-sm">
-                            บันทึกใบแจ้งหนี้
+                            บันทึกใบแจ้งชำระ
                         </button>
                     </form>
                 </div>
@@ -710,22 +710,38 @@
         }
 
         async function fetchRooms() {
-            try {
-                const res = await fetch(`${API_URL}/rooms`);
-                rooms = await res.json();
-                renderRooms(rooms);
-                if (currentUser && currentUser.roleId === 1) renderAdminRoomsTable();
-            } catch (err) { console.error(err); }
+    try {
+        const res = await fetch(`${API_URL}/rooms`);
+        const data = await res.json();
+        if (!res.ok || !Array.isArray(data)) {
+            console.error('API Error:', data);
+            return;
         }
+        rooms = data;
+        renderRooms(rooms);
+        if (currentUser && currentUser.roleId === 1) {
+            renderAdminRoomsTable();
+        }
+        
+        populateInvoiceRoomSelect(); 
+    } catch (err) { console.error(err); }
+}
 
         // ฟังก์ชันเรนเดอร์การ์ดห้องพักพร้อมป้ายสถานะ
         function renderRooms(data) {
             const grid = document.getElementById('room-grid');
             grid.innerHTML = data.map(r => {
-                const status = r.statusName || 'ว่าง';
+                // แปลง RoomStatusID เป็นข้อความสถานะ (ปรับเลข ID ให้ตรงกับฐานข้อมูลจริงของคุณได้ครับ)
+                let status = 'ว่าง';
                 let badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-200';
-                if (status === 'จองแล้ว') badgeColor = 'bg-amber-50 text-amber-600 border-amber-200';
-                if (status === 'เช่าอยู่') badgeColor = 'bg-rose-50 text-rose-600 border-rose-200';
+
+                if (r.roomStatusID === 2 || r.roomStatusID === '2') {
+                    status = 'จองแล้ว';
+                    badgeColor = 'bg-amber-50 text-amber-600 border-amber-200';
+                } else if (r.roomStatusID === 3 || r.roomStatusID === '3') {
+                    status = 'เช่าอยู่';
+                    badgeColor = 'bg-rose-50 text-rose-600 border-rose-200';
+                }
 
                 return `
                     <div onclick="openRoomDetail(${r.id})" class="bg-white rounded-2xl border shadow-sm overflow-hidden flex flex-col justify-between cursor-pointer hover:shadow-md transition-shadow relative">
@@ -740,7 +756,7 @@
                             </div>
                             <p class="text-xs text-slate-500 line-clamp-2">${r.description || 'ไม่มีรายละเอียด'}</p>
                             <div class="pt-2 border-t flex justify-between items-center">
-                                <span class="text-brand-600 font-bold text-lg">฿${r.price.toLocaleString()} / เดือน</span>
+                                <span class="text-brand-600 font-bold text-lg">฿${Number(r.price || 0).toLocaleString()} / เดือน</span>
                                 <span class="text-xs text-slate-400">ชั้น ${r.floor}</span>
                             </div>
                         </div>
@@ -1175,7 +1191,7 @@
 // เรียกใช้งานฟังก์ชันเติม Dropdown เมื่อโหลดห้องพักสำเร็จ (ใส่ไว้ในฟังก์ชัน fetchRooms เดิม)
 // ตัวอย่าง: ภายใน fetchRooms() หลังจากได้ rooms มาแล้ว ให้เรียก populateInvoiceRoomSelect(); เพิ่มเข้าไป
 
-// ฟังก์ชันกดปุ่มบันทึกใบแจ้งหนี้
+// ฟังก์ชันกดปุ่มบันทึกใบแจ้งชำระ
 async function handleCreateInvoice(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-submit-invoice');
