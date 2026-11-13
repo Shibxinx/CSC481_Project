@@ -326,13 +326,16 @@
             <div class="border-b pb-4 flex justify-between items-center flex-wrap gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800">แผงควบคุมระบบนิติบุคคล (Admin Panel)</h2>
-                    <p class="text-slate-500 text-sm">จัดการข้อมูลห้องพัก ผู้พักใหม่ ออกใบแจ้งหนี้ และลงประกาศข่าวสารในระบบ</p>
+                    <p class="text-slate-500 text-sm">จัดการข้อมูลห้องพัก ผู้พักใหม่ ออกใบแจ้งหนี้
+                        และลงประกาศข่าวสารในระบบ</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openModal('add-room-modal')" class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 shadow-sm">
+                    <button onclick="openModal('add-room-modal')"
+                        class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 shadow-sm">
                         <i class="fa-solid fa-plus mr-2"></i>เพิ่มห้องพักใหม่
                     </button>
-                    <button onclick="openModal('add-user-modal')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 shadow-sm">
+                    <button onclick="openModal('add-user-modal')"
+                        class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 shadow-sm">
                         <i class="fa-solid fa-user-plus mr-2"></i>เพิ่มผู้ใช้งานใหม่
                     </button>
                 </div>
@@ -340,37 +343,45 @@
 
             <!-- ส่วนฟอร์มการจัดการ (จัดเป็น 2 คอลัมน์: ออกใบแจ้งหนี้ & ลงประกาศข่าวสาร) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 <!-- 1. ฟอร์มออกใบแจ้งหนี้ค่าห้อง - ค่าน้ำ - ค่าไฟ (เพิ่มใหม่) -->
                 <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                     <h3 class="font-bold text-slate-800 text-lg flex items-center border-b pb-3">
-                        <i class="fa-solid fa-file-invoice text-brand-600 mr-2"></i>ออกใบแจ้งหนี้ค่าห้อง - ค่าน้ำ - ค่าไฟ
+                        <i class="fa-solid fa-file-invoice text-brand-600 mr-2"></i>ออกใบแจ้งหนี้ค่าห้อง - ค่าน้ำ -
+                        ค่าไฟ
                     </h3>
                     <form id="invoice-form" onsubmit="handleCreateInvoice(event)" class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">เลือกห้องพัก</label>
-                            <select id="inv-room-id" required class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
+                            <select id="inv-room-id" required
+                                class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
                                 <option value="">-- เลือกห้องพัก --</option>
                             </select>
                         </div>
-                        
+
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">หน่วยใช้น้ำ (ยูนิต)</label>
-                                <input type="number" id="inv-water-units" value="0" min="0" required class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">หน่วยใช้น้ำ
+                                    (ยูนิต)</label>
+                                <input type="number" id="inv-water-units" value="0" min="0" required
+                                    class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">หน่วยใช้ไฟ (ยูนิต)</label>
-                                <input type="number" id="inv-electric-units" value="0" min="0" required class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">หน่วยใช้ไฟ
+                                    (ยูนิต)</label>
+                                <input type="number" id="inv-electric-units" value="0" min="0" required
+                                    class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">รอบเดือนประจำงวด</label>
-                            <input type="month" id="inv-billing-month" value="2026-11" required class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
+                            <input type="month" id="inv-billing-month" value="2026-11" required
+                                class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 focus:ring-2 focus:ring-brand-500 outline-none">
                         </div>
 
-                        <button type="submit" id="btn-submit-invoice" class="w-full bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-xl text-sm font-medium transition-colors shadow-sm">
+                        <button type="submit" id="btn-submit-invoice"
+                            class="w-full bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-xl text-sm font-medium transition-colors shadow-sm">
                             บันทึกใบแจ้งชำระ
                         </button>
                     </form>
@@ -382,14 +393,17 @@
                         <i class="fa-solid fa-bullhorn text-brand-600 mr-2"></i>ลงประกาศข่าวสารใหม่
                     </h3>
                     <form id="news-form" onsubmit="handleCreateNews(event)" class="space-y-3">
-                        <input type="text" id="news-title" placeholder="หัวข้อประกาศ..." required class="w-full border p-2.5 rounded-xl text-sm bg-slate-50">
+                        <input type="text" id="news-title" placeholder="หัวข้อประกาศ..." required
+                            class="w-full border p-2.5 rounded-xl text-sm bg-slate-50">
                         <select id="news-type" class="w-full border p-2.5 rounded-xl text-sm bg-slate-50">
                             <option value="General">ทั่วไป (General)</option>
                             <option value="Maintenance">ซ่อมบำรุง (Maintenance)</option>
                             <option value="Urgent">ด่วนมาก (Urgent)</option>
                         </select>
-                        <textarea id="news-content" placeholder="รายละเอียดเนื้อหา..." rows="3" required class="w-full border p-2.5 rounded-xl text-sm bg-slate-50"></textarea>
-                        <button type="submit" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors">เผยแพร่ประกาศ</button>
+                        <textarea id="news-content" placeholder="รายละเอียดเนื้อหา..." rows="3" required
+                            class="w-full border p-2.5 rounded-xl text-sm bg-slate-50"></textarea>
+                        <button type="submit"
+                            class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-slate-800 transition-colors">เผยแพร่ประกาศ</button>
                     </form>
                 </div>
 
@@ -453,46 +467,65 @@
 
     <!-- MODAL: EDIT ROOM (สำหรับนิติแก้ไขข้อมูลห้อง) -->
     <div id="edit-room-modal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 relative shadow-2xl space-y-4">
-            <button onclick="closeModal('edit-room-modal')"
-                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i
-                    class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-xl font-bold text-slate-800 border-b pb-2">แก้ไขข้อมูลห้องพัก</h3>
-            <form id="edit-room-form" onsubmit="handleUpdateRoom(event)" class="space-y-3">
-                <input type="hidden" id="edit-room-id">
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl relative">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-slate-800 text-lg">แก้ไขข้อมูลห้องพัก</h3>
+                <button onclick="closeModal('edit-room-modal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="edit-room-form" onsubmit="handleUpdateRoom(event)" class="space-y-4">
+                <!-- เปลี่ยนหมายเลขห้องเป็น Dropdown -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">หมายเลขห้อง</label>
-                    <input type="text" id="edit-room-number" required
-                        class="w-full border p-2.5 rounded-lg text-sm bg-slate-50 uppercase">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">ชั้น</label>
-                        <input type="number" id="edit-room-floor" required
-                            class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">ราคาค่าเช่า (บาท)</label>
-                        <input type="number" id="edit-room-price" required
-                            class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">สถานะห้องพัก</label>
-                    <select id="edit-room-status" class="w-full border p-2.5 rounded-lg text-sm bg-slate-50">
-                        <option value="ว่าง">ห้องว่าง</option>
-                        <option value="จองแล้ว">จองแล้ว</option>
-                        <option value="เช่าอยู่">เช่าอยู่</option>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">หมายเลขห้อง</label>
+                    <select id="edit-room-id" onchange="loadRoomDataToForm(this.value)" required
+                        class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 outline-none">
+                        <option value="">-- เลือกห้องพักที่ต้องการแก้ไข --</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">รายละเอียด</label>
-                    <textarea id="edit-room-desc" rows="3"
-                        class="w-full border p-2.5 rounded-lg text-sm bg-slate-50"></textarea>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">ชั้น</label>
+                        <input type="number" id="edit-room-floor" required
+                            class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">ราคาค่าเช่า (บาท)</label>
+                        <input type="number" id="edit-room-price" required
+                            class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 outline-none">
+                    </div>
                 </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">ขนาดพื้นที่ (ตร.ม.)</label>
+                        <input type="number" step="0.01" id="edit-room-area" required
+                            class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">สถานะห้องพัก</label>
+                        <select id="edit-room-status"
+                            class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 outline-none">
+                            <option value="1">ห้องว่าง</option>
+                            <option value="2">จองแล้ว</option>
+                            <option value="3">เช่าอยู่</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">รายละเอียด</label>
+                    <textarea id="edit-room-description" rows="3"
+                        class="w-full border border-slate-200 p-2.5 rounded-xl text-sm bg-slate-50 outline-none"></textarea>
+                </div>
+
                 <button type="submit"
-                    class="w-full bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-xl font-medium text-sm shadow">บันทึกการแก้ไข</button>
+                    class="w-full bg-brand-600 hover:bg-brand-700 text-white py-3 rounded-xl text-sm font-medium transition-colors shadow-sm">
+                    บันทึกการแก้ไข
+                </button>
             </form>
         </div>
     </div>
@@ -710,22 +743,22 @@
         }
 
         async function fetchRooms() {
-    try {
-        const res = await fetch(`${API_URL}/rooms`);
-        const data = await res.json();
-        if (!res.ok || !Array.isArray(data)) {
-            console.error('API Error:', data);
-            return;
+            try {
+                const res = await fetch(`${API_URL}/rooms`);
+                const data = await res.json();
+                if (!res.ok || !Array.isArray(data)) {
+                    console.error('API Error:', data);
+                    return;
+                }
+                rooms = data;
+                renderRooms(rooms);
+                if (currentUser && currentUser.roleId === 1) {
+                    renderAdminRoomsTable();
+                }
+
+                populateInvoiceRoomSelect();
+            } catch (err) { console.error(err); }
         }
-        rooms = data;
-        renderRooms(rooms);
-        if (currentUser && currentUser.roleId === 1) {
-            renderAdminRoomsTable();
-        }
-        
-        populateInvoiceRoomSelect(); 
-    } catch (err) { console.error(err); }
-}
 
         // ฟังก์ชันเรนเดอร์การ์ดห้องพักพร้อมป้ายสถานะ
         function renderRooms(data) {
@@ -1182,48 +1215,115 @@
         }
 
         function populateInvoiceRoomSelect() {
-    const select = document.getElementById('inv-room-id');
-    if (!select) return;
-    select.innerHTML = '<option value="">-- เลือกห้องพัก --</option>' + 
-        rooms.map(r => `<option value="${r.id}">ห้อง ${r.roomNumber} (ค่าเช่า ฿${Number(r.price || 0).toLocaleString()} | ${r.areaSqm || 0} ตร.ม.)</option>`).join('');
-}
+            const select = document.getElementById('inv-room-id');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- เลือกห้องพัก --</option>' +
+                rooms.map(r => `<option value="${r.id}">ห้อง ${r.roomNumber} (ค่าเช่า ฿${Number(r.price || 0).toLocaleString()} | ${r.areaSqm || 0} ตร.ม.)</option>`).join('');
+        }
 
-// เรียกใช้งานฟังก์ชันเติม Dropdown เมื่อโหลดห้องพักสำเร็จ (ใส่ไว้ในฟังก์ชัน fetchRooms เดิม)
-// ตัวอย่าง: ภายใน fetchRooms() หลังจากได้ rooms มาแล้ว ให้เรียก populateInvoiceRoomSelect(); เพิ่มเข้าไป
+        // เรียกใช้งานฟังก์ชันเติม Dropdown เมื่อโหลดห้องพักสำเร็จ (ใส่ไว้ในฟังก์ชัน fetchRooms เดิม)
+        // ตัวอย่าง: ภายใน fetchRooms() หลังจากได้ rooms มาแล้ว ให้เรียก populateInvoiceRoomSelect(); เพิ่มเข้าไป
 
-// ฟังก์ชันกดปุ่มบันทึกใบแจ้งชำระ
-async function handleCreateInvoice(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-submit-invoice');
-    const roomId = document.getElementById('inv-room-id').value;
-    const waterUnits = document.getElementById('inv-water-units').value;
-    const electricUnits = document.getElementById('inv-electric-units').value;
-    const billingMonth = document.getElementById('inv-billing-month').value;
+        // ฟังก์ชันกดปุ่มบันทึกใบแจ้งชำระ
+        async function handleCreateInvoice(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-invoice');
+            const roomId = document.getElementById('inv-room-id').value;
+            const waterUnits = document.getElementById('inv-water-units').value;
+            const electricUnits = document.getElementById('inv-electric-units').value;
+            const billingMonth = document.getElementById('inv-billing-month').value;
 
-    if (!roomId) return showToast('กรุณาเลือกห้องพัก');
+            if (!roomId) return showToast('กรุณาเลือกห้องพัก');
 
-    btn.disabled = true;
-    btn.innerText = 'กำลังบันทึก...';
+            btn.disabled = true;
+            btn.innerText = 'กำลังบันทึก...';
 
-    try {
-        const res = await fetch(`${API_URL}/invoices`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ roomId, billingMonth, waterUnits, electricUnits })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'บันทึกใบแจ้งชำระไม่สำเร็จ');
+            try {
+                const res = await fetch(`${API_URL}/invoices`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roomId, billingMonth, waterUnits, electricUnits })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'บันทึกใบแจ้งชำระไม่สำเร็จ');
 
-        document.getElementById('invoice-form').reset();
-        document.getElementById('inv-billing-month').value = '2026-11';
-        showToast(`บันทึกใบแจ้งชำระสำเร็จ (ยอดรวม ฿${Number(data.totalAmount).toLocaleString()})`);
-    } catch (err) {
-        showToast(err.message);
-    } finally {
-        btn.disabled = false;
-        btn.innerText = 'บันทึกใบแจ้งชำระ';
-    }
-}
+                document.getElementById('invoice-form').reset();
+                document.getElementById('inv-billing-month').value = '2026-11';
+                showToast(`บันทึกใบแจ้งชำระสำเร็จ (ยอดรวม ฿${Number(data.totalAmount).toLocaleString()})`);
+            } catch (err) {
+                showToast(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'บันทึกใบแจ้งชำระ';
+            }
+        }
+
+        function populateEditRoomSelect(selectedRoomId = null) {
+            const select = document.getElementById('edit-room-id');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">-- เลือกห้องพักที่ต้องการแก้ไข --</option>' +
+                rooms.map(r => `<option value="${r.id}">ห้อง ${r.roomNumber}</option>`).join('');
+
+            if (selectedRoomId) {
+                select.value = selectedRoomId;
+                loadRoomDataToForm(selectedRoomId);
+            }
+        }
+
+        // 2. เมื่อเลือกห้องใน Dropdown ให้ดึงข้อมูลเดิมมาแสดงในฟอร์มทันที
+        function loadRoomDataToForm(roomId) {
+            if (!roomId) {
+                document.getElementById('edit-room-form').reset();
+                return;
+            }
+
+            const room = rooms.find(r => r.id == roomId);
+            if (!room) return;
+
+            document.getElementById('edit-room-floor').value = room.floor || '';
+            document.getElementById('edit-room-price').value = room.price || '';
+            document.getElementById('edit-room-area').value = room.areaSqm || '';
+            document.getElementById('edit-room-status').value = room.roomStatusID || 1;
+            document.getElementById('edit-room-description').value = room.description || '';
+        }
+
+        // 3. ฟังก์ชันเปิด Modal แก้ไข (รองรับการกดจากปุ่มในการ์ดหรือตาราง)
+        function openEditRoomModal(roomId) {
+            populateEditRoomSelect(roomId);
+            openModal('edit-room-modal');
+        }
+
+        // 4. ฟังก์ชันส่งข้อมูลอัปเดตไปยัง Backend
+        async function handleUpdateRoom(e) {
+            e.preventDefault();
+            const roomId = document.getElementById('edit-room-id').value;
+            if (!roomId) return showToast('กรุณาเลือกห้องที่ต้องการแก้ไข');
+
+            const updatedData = {
+                floor: document.getElementById('edit-room-floor').value,
+                baseRent: document.getElementById('edit-room-price').value,
+                areaSqm: document.getElementById('edit-room-area').value,
+                roomStatusID: document.getElementById('edit-room-status').value,
+                description: document.getElementById('edit-room-description').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/rooms/${roomId}`, {
+                    method: 'PUT', // หรือ PATCH ตามที่ API ของคุณรองรับ
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (!res.ok) throw new Error('ไม่สามารถบันทึกข้อมูลได้');
+
+                showToast('อัปเดตข้อมูลห้องพักสำเร็จ');
+                closeModal('edit-room-modal');
+                fetchRooms(); // โหลดข้อมูลใหม่
+            } catch (err) {
+                showToast(err.message);
+            }
+        }
     </script>
 </body>
 
